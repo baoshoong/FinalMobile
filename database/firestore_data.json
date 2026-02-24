@@ -1,0 +1,161 @@
+{
+  "categories": {
+    "1": {
+      "category_id": 1,
+      "category_name": "Linh kiện điện tử",
+      "image_url": "cat_electronic.png",
+      "created_at": "2026-02-24T10:00:00Z"
+    },
+    "2": {
+      "category_id": 2,
+      "category_name": "Thời trang",
+      "image_url": "cat_fashion.png",
+      "created_at": "2026-02-24T10:00:00Z"
+    },
+    "3": {
+      "category_id": 3,
+      "category_name": "Truyện tranh",
+      "image_url": "cat_manga.png",
+      "created_at": "2026-02-24T10:00:00Z"
+    }
+  },
+  "products": {
+    "1": {
+      "product_id": 1,
+      "product_name": "Module Wifi ESP8266",
+      "product_description": "Chip Wifi IoT giá rẻ, phổ biến cho smarthome",
+      "price": 85000,
+      "stock": 100,
+      "image_url": "ESP8266.jpg",
+      "category_id": 1,
+      "is_hidden": false,
+      "created_at": "2026-02-24T10:00:00Z"
+    },
+    "2": {
+      "product_id": 2,
+      "product_name": "Màn hình LCD 1602",
+      "product_description": "Màn hình hiển thị ký tự xanh lá",
+      "price": 35000,
+      "stock": 50,
+      "image_url": "LCD.jpg",
+      "category_id": 1,
+      "is_hidden": false,
+      "created_at": "2026-02-24T10:00:00Z"
+    },
+    "3": {
+      "product_id": 3,
+      "product_name": "Cảm biến mưa",
+      "product_description": "Module cảm biến phát hiện nước mưa",
+      "price": 25000,
+      "stock": 80,
+      "image_url": "RainSensor.jpg",
+      "category_id": 1,
+      "is_hidden": false,
+      "created_at": "2026-02-24T10:00:00Z"
+    },
+    "4": {
+      "product_id": 4,
+      "product_name": "Vietduino Uno",
+      "product_description": "Mạch Arduino phiên bản Việt Nam chất lượng cao",
+      "price": 150000,
+      "stock": 20,
+      "image_url": "Vietduino.jpg",
+      "category_id": 1,
+      "is_hidden": false,
+      "created_at": "2026-02-24T10:00:00Z"
+    },
+    "5": {
+      "product_id": 5,
+      "product_name": "Quần Jean Nam",
+      "product_description": "Quần bò ống đứng, vải bền đẹp",
+      "price": 450000,
+      "stock": 30,
+      "image_url": "Jean.jpg",
+      "category_id": 2,
+      "is_hidden": false,
+      "created_at": "2026-02-24T10:00:00Z"
+    },
+    "6": {
+      "product_id": 6,
+      "product_name": "Áo Sơ mi",
+      "product_description": "Áo sơ mi công sở lịch lãm",
+      "price": 250000,
+      "stock": 40,
+      "image_url": "Shirt.jpg",
+      "category_id": 2,
+      "is_hidden": false,
+      "created_at": "2026-02-24T10:00:00Z"
+    },
+    "7": {
+      "product_id": 7,
+      "product_name": "Truyện Berserk",
+      "product_description": "Manga hành động giả tưởng đen tối kinh điển",
+      "price": 120000,
+      "stock": 15,
+      "image_url": "Berserk.jpg",
+      "category_id": 3,
+      "is_hidden": false,
+      "created_at": "2026-02-24T10:00:00Z"
+    },
+    "8": {
+      "product_id": 8,
+      "product_name": "Truyện Overlord",
+      "product_description": "Light Novel về thế giới game thực tế ảo",
+      "price": 110000,
+      "stock": 25,
+      "image_url": "Overlord.jpg",
+      "category_id": 3,
+      "is_hidden": false,
+      "created_at": "2026-02-24T10:00:00Z"
+    },
+    "9": {
+      "product_id": 9,
+      "product_name": "Truyện Vinland Saga",
+      "product_description": "Manga lịch sử về chiến binh Viking",
+      "price": 105000,
+      "stock": 20,
+      "image_url": "Vinland.jpg",
+      "category_id": 3,
+      "is_hidden": false,
+      "created_at": "2026-02-24T10:00:00Z"
+    }
+  },
+  "users": {
+    "1": {
+      "user_id": 1,
+      "username": "admin",
+      "password": "123456",
+      "email": "admin@finsl.com",
+      "full_name": "Administrator",
+      "phone": "0123456789",
+      "address": "Admin Office",
+      "role": "admin",
+      "created_at": "2026-02-24T10:00:00Z"
+    },
+    "2": {
+      "user_id": 2,
+      "username": "customer1",
+      "password": "pass123",
+      "email": "customer@gmail.com",
+      "full_name": "Nguyễn Văn A",
+      "phone": "0987654321",
+      "address": "Hà Nội",
+      "role": "customer",
+      "created_at": "2026-02-24T10:00:00Z"
+    }
+  },
+  "counters": {
+    "categories": {
+      "currentId": 3
+    },
+    "products": {
+      "currentId": 9
+    },
+    "users": {
+      "currentId": 2
+    },
+    "orders": {
+      "currentId": 0
+    }
+  }
+}
