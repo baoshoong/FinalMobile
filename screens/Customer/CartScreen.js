@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, Image } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector, useDispatch } from 'react-redux';
 import { removeFromCart, updateCartQuantity } from '../../redux/slices/authSlice';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import SmartImage from '../../components/ImageHelper';
 
 const CartScreen = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -50,12 +51,16 @@ const CartScreen = ({ navigation }) => {
     navigation.navigate('CheckoutScreen');
   };
 
-  const renderCartItem = ({ item }) => (
+  const renderCartItem = ({ item }) => {
+    return (
     <View style={styles.cartItem}>
-      <Image 
-        source={{ uri: item.image_url }} 
+      <SmartImage
+        imageUrl={item.image_url}
         style={styles.productImage}
-        defaultSource={require('../../assets/icon.png')}
+        productName={item.product_name}
+        placeholderIcon="image"
+        placeholderText=""
+        showLoading={false}
       />
       <View style={styles.itemDetails}>
         <Text style={styles.productName}>{item.product_name || 'Sản phẩm không xác định'}</Text>
@@ -92,6 +97,7 @@ const CartScreen = ({ navigation }) => {
       </TouchableOpacity>
     </View>
   );
+  };
 
   if (cart.length === 0) {
     return (
@@ -110,10 +116,12 @@ const CartScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-    <View style={styles.container}>      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+    <View style={styles.container}>
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <FontAwesome5 name="arrow-left" size={20} color="#007bff" />
         <Text style={styles.backButtonText}>Quay lại</Text>
-      </TouchableOpacity>      <Text style={styles.title}>GIỎ HÀNG CỦA BẠN</Text>
+      </TouchableOpacity>
+      <Text style={styles.title}>GIỎ HÀNG CỦA BẠN</Text>
       
       <FlatList
         data={cart}

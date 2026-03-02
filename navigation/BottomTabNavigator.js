@@ -86,7 +86,7 @@ function BottomTabNavigator() {
             {/* Đăng xuất */}
             <Tab.Screen
         name="Logout"
-        component={() => null}
+        children={() => null}
         options={{
           tabBarLabel: 'Đăng xuất',
           tabBarIcon: ({ color, size }) => (

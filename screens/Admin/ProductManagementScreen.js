@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, Alert, Switch } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import axios from 'axios';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import API_BASE_URL from '../../config/api';
+import SmartImage from '../../components/ImageHelper';
 
 const ProductManagementScreen = ({ navigation }) => {
   const [products, setProducts] = useState([]);
@@ -56,10 +57,12 @@ const ProductManagementScreen = ({ navigation }) => {
 
   const renderProductItem = ({ item }) => (
     <View style={[styles.productCard, item.is_hidden && styles.hiddenProduct]}>
-      <Image
-        source={{ uri: item.image_url }}
+      <SmartImage
+        imageUrl={item.image_url}
         style={styles.productImage}
-        onError={() => Alert.alert('Lỗi ảnh', `Không thể tải ảnh: ${item.product_name}`)}
+        productName={item.product_name}
+        placeholderText="No image"
+        showLoading={false}
       />
       <View style={styles.productDetails}>
         <Text style={styles.productName}>

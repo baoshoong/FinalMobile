@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import axios from 'axios';
 import API_BASE_URL from '../../config/api';
+import SmartImage from '../../components/ImageHelper';
 
 const CustomerInterfaceScreen = ({ navigation, route }) => {
   const [products, setProducts] = useState([]);
@@ -32,20 +33,19 @@ const CustomerInterfaceScreen = ({ navigation, route }) => {
   }, [categoryId]);
 
   const renderProduct = ({ item }) => {
-    console.log('Image URL:', item.image_url); // Debug: xem URL ảnh
-    console.log('Price:', item.price, 'Formatted:', item.price.toLocaleString('vi-VN')); // Debug: xem giá
+    console.log('Rendering Product:', item.product_name, '- Image:', item.image_url);
+    
     return (
       <TouchableOpacity
         style={styles.productCard}
         onPress={() => navigation.navigate('ProductDetail', { product: item })}
       >
-        <Image
-          source={{ uri: item.image_url }}
+        <SmartImage
+          imageUrl={item.image_url}
           style={styles.productImage}
-          onError={(e) => {
-            console.error('Image load error:', e.nativeEvent.error);
-            Alert.alert('Lỗi ảnh', `Không thể tải ảnh: ${item.product_name}\nURL: ${item.image_url}`);
-          }}
+          productName={item.product_name}
+          placeholderText="Không có ảnh"
+          showLoading={false}
         />
         <Text style={styles.productName}>{item.product_name}</Text>
         <Text style={styles.productPrice}>Giá: {item.price.toLocaleString('vi-VN')} ₫</Text>
@@ -65,7 +65,7 @@ const CustomerInterfaceScreen = ({ navigation, route }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.header}>
-        {categoryName ? categoryName : 'E-commerce shop'}
+        {categoryName ? categoryName : 'Shop'}
       </Text>
       {categoryName && (
         <TouchableOpacity 
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     marginBottom: 10,
-    resizeMode: 'cover',
+    borderRadius: 4,
   },
   productName: {
     fontSize: 16,

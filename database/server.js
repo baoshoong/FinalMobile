@@ -4,18 +4,51 @@ const cors = require('cors');
 const path = require('path');
 const multer = require('multer');
 const fs = require('fs');
+const os = require('os');
 const { v4: uuidv4 } = require('uuid');
 const { db, storage, admin } = require('./firebaseConfig');
 
 // Configuration
 const PORT = process.env.PORT || 3001;
-const API_BASE_URL = process.env.API_BASE_URL || 'http://192.168.1.5:3001';
+
+// Hàm lấy IP address của máy tính
+function getLocalIP() {
+  const interfaces = os.networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      // Lấy IPv4 address, bỏ qua localhost
+      if (iface.family === 'IPv4' && !iface.internal) {
+        return iface.address;
+      }
+    }
+  }
+  return '127.0.0.1';
+}
+
+const LOCAL_IP = getLocalIP();
+const API_BASE_URL = process.env.API_BASE_URL || `http://${LOCAL_IP}:${PORT}`;
 
 const app = express();
 
-app.use(cors());
-app.use(bodyParser.json());
-app.use('/images', express.static(path.join(__dirname, 'images')));
+// CORS configuration - chi tiết cho file uploads
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Body parser with larger limit for file uploads
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+
+// Serve static images directory
+const imagesDir = path.join(__dirname, 'images');
+// Tạo folder images nếu chưa tồn tại
+if (!fs.existsSync(imagesDir)) {
+  fs.mkdirSync(imagesDir, { recursive: true });
+  console.log('📁 Created images directory:', imagesDir);
+}
+app.use('/images', express.static(imagesDir));
 
 // Cấu hình multer để lưu file tạm
 const uploadStorage = multer.diskStorage({
@@ -35,22 +68,24 @@ const uploadStorage = multer.diskStorage({
 
 const upload = multer({ 
   storage: uploadStorage,
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { 
+    fileSize: 50 * 1024 * 1024 // Tăng lên 50MB
+  },
   fileFilter: (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|gif/;
+    const allowedTypes = /jpeg|jpg|png|gif|webp/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
     
     if (mimetype && extname) {
       return cb(null, true);
     } else {
-      cb(new Error('Chỉ chấp nhận file ảnh (jpeg, jpg, png, gif)'));
+      cb(new Error('Chỉ chấp nhận file ảnh (jpeg, jpg, png, gif, webp)'));
     }
   }
 });
 
 // Start server
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on ${API_BASE_URL}`);
   console.log('Using Firebase Firestore as database');
   console.log('Static files served from:', path.join(__dirname, 'images'));
@@ -78,7 +113,44 @@ app.get('/', (req, res) => {
       login: 'POST /login',
       register: 'POST /register',
       orders: 'GET /orders',
-      seedData: 'POST /seed-data'
+      seedData: 'POST /seed-data',
+      health: 'GET /health',
+      uploadImage: 'POST /upload-image'
+    }
+  });
+});
+
+// ============================================
+// HEALTH CHECK - để kiểm tra trạng thái server
+// ============================================
+app.get('/health', (req, res) => {
+  const imagesDir = path.join(__dirname, 'images');
+  const imagesExist = fs.existsSync(imagesDir);
+  let imageCount = 0;
+  
+  if (imagesExist) {
+    try {
+      imageCount = fs.readdirSync(imagesDir).length;
+    } catch (err) {
+      console.error('Error reading images directory:', err.message);
+    }
+  }
+
+  res.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    server: {
+      running: true,
+      port: PORT,
+      ip: LOCAL_IP,
+      baseUrl: API_BASE_URL
+    },
+    images: {
+      directory: imagesDir,
+      exists: imagesExist,
+      accessible: imagesExist,
+      fileCount: imageCount,
+      servedFrom: `${API_BASE_URL}/images/`
     }
   });
 });
@@ -86,6 +158,23 @@ app.get('/', (req, res) => {
 // ============================================
 // HELPER FUNCTIONS
 // ============================================
+
+// Helper: Convert image_url to filename only (client builds URL dynamically)
+function getFullImageUrl(imageUrl) {
+  if (!imageUrl) return null;
+  
+  // Nếu đã là full URL (từ data cũ), extract filename
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    const filename = imageUrl.split('/images/').pop();
+    if (filename && !filename.includes('http')) {
+      return filename;
+    }
+    return imageUrl; // fallback
+  }
+  
+  // Nếu chỉ là filename, trả về nguyên
+  return imageUrl;
+}
 
 // Tạo ID tự động tăng cho collection
 async function getNextId(collectionName) {
@@ -224,23 +313,49 @@ app.get('/test/users', async (req, res) => {
 // ============================================
 // API UPLOAD IMAGE
 // ============================================
-app.post('/upload-image', upload.single('image'), (req, res) => {
-  try {
+app.post('/upload-image', (req, res) => {
+  // Middleware xử lý upload file
+  upload.single('image')(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      // Lỗi của Multer
+      console.error('Multer error:', err.message);
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ error: 'File quá lớn. Tối đa 50MB.' });
+      }
+      return res.status(400).json({ error: 'Lỗi upload: ' + err.message });
+    } else if (err) {
+      // Lỗi khác (từ fileFilter)
+      console.error('Upload validation error:', err.message);
+      return res.status(400).json({ error: err.message });
+    }
+
+    // Xử lý upload thành công
     if (!req.file) {
+      console.warn('No file in request');
       return res.status(400).json({ error: 'Không có file được upload' });
     }
-    
-    console.log('File uploaded:', req.file.filename);
-    
-    res.json({ 
-      success: true, 
-      filename: req.file.filename,
-      url: `${API_BASE_URL}/images/${req.file.filename}`
-    });
-  } catch (error) {
-    console.error('Upload error:', error);
-    res.status(500).json({ error: 'Lỗi khi upload ảnh: ' + error.message });
-  }
+
+    try {
+      const filename = req.file.filename;
+      
+      console.log('✅ File uploaded successfully:');
+      console.log('   - Filename:', filename);
+      console.log('   - Size:', req.file.size, 'bytes');
+      console.log('   ⚠️  NOTE: Returning filename only (client builds URL dynamically)');
+
+      // Chỉ trả về filename, không có full URL
+      // Client sẽ tự build URL từ API_BASE_URL hiện tại
+      res.json({ 
+        success: true, 
+        filename: filename,
+        size: req.file.size,
+        // Không trả url để client tự build động
+      });
+    } catch (error) {
+      console.error('Upload processing error:', error);
+      res.status(500).json({ error: 'Lỗi khi xử lý ảnh: ' + error.message });
+    }
+  });
 });
 
 // ============================================
@@ -351,7 +466,7 @@ app.get('/products', async (req, res) => {
       const data = doc.data();
       return {
         ...data,
-        image_url: data.image_url ? `${API_BASE_URL}/images/${data.image_url}` : null
+        image_url: getFullImageUrl(data.image_url)
       };
     });
     
@@ -802,7 +917,7 @@ app.get('/admin/statistics', async (req, res) => {
         const product = products.find(prod => prod.product_id === p.product_id);
         return {
           ...p,
-          image_url: product ? `${API_BASE_URL}/images/${product.image_url}` : null
+          image_url: getFullImageUrl(product?.image_url)
         };
       });
     

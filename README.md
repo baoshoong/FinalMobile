@@ -102,7 +102,7 @@ node server.js
 
 **Output thành công:**
 ```
-Server running on http://192.168.1.5:3001
+Server running on http://192.168.x.x:3001  (IP tự động detect)
 Using Firebase Firestore as database
 Static files served from: ...\database\images
 ```
@@ -122,7 +122,7 @@ npx expo start
 █ ▄▄▄▄▄ █ ██▀▀█▀▄▀█ ▄▄▄▄▄ █
 █ █   █ █  ▀█ ▀█ ██ █   █ █
 ...
-› Metro waiting on exp://192.168.1.5:8081
+› Metro waiting on exp://192.168.x.x:8081  (IP tự động detect)
 › Scan the QR code above with Expo Go
 ```
 
@@ -133,6 +133,7 @@ npx expo start
 1. **Đảm bảo điện thoại và máy tính cùng mạng WiFi**
 2. Mở app **Expo Go** trên điện thoại
 3. **Scan QR code** hiển thị trong Terminal
+4. **Ứng dụng sẽ tự động kết nối đến server** (IP được detect tự động)
 
 ---
 
@@ -143,10 +144,12 @@ npx expo start
 Sau khi server chạy, mở Terminal mới và chạy:
 
 ```powershell
-Invoke-RestMethod -Uri "http://192.168.1.5:3001/seed-data" -Method POST
+# Lấy IP từ server console và thay vào đây
+$IP = "192.168.x.x"  # Xem trong console server output
+Invoke-RestMethod -Uri "http://$IP:3001/seed-data" -Method POST
 ```
 
-Hoặc mở browser: `http://192.168.1.5:3001/seed-data` (POST request)
+Hoặc mở browser: `http://192.168.x.x:3001/seed-data` (thay IP thực tế)
 
 ---
 
@@ -184,20 +187,19 @@ Hoặc mở browser: `http://192.168.1.5:3001/seed-data` (POST request)
 
 ---
 
-## 🔧 Cấu hình IP Address
+## 🔧 Cấu hình tự động (Không cần thay đổi thủ công!)
 
-Nếu không kết nối được, cần thay đổi IP trong file `config/api.js`:
+✅ **Server** (`database/server.js`): Tự động detect IP từ network interface
+✅ **Mobile App** (`config/api.js`): Tự động lấy IP từ Expo dev server
 
-```javascript
-// Tìm IP máy tính của bạn bằng lệnh: ipconfig (Windows) hoặc ifconfig (Mac/Linux)
-const API_BASE_URL = 'http://YOUR_IP_ADDRESS:3001';
+**Chỉ cần:**
+1. Đảm bảo điện thoại và PC cùng WiFi
+2. Chạy server: `node server.js`
+3. Chạy Expo: `npx expo start`
+4. Scan QR code - **Done!** ✨
 
-export default API_BASE_URL;
-```
+**Nếu production APK**: Đặt biến môi trường `API_BASE_URL`
 
-**Cách tìm IP:**
-```powershell
-# Windows
 ipconfig
 # Tìm dòng "IPv4 Address" trong phần "Wireless LAN adapter Wi-Fi"
 ```

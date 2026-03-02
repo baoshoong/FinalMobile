@@ -155,10 +155,10 @@ const OrderManagementScreen = ({ navigation }) => {
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.container}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <FontAwesome5 name="arrow-left" size={20} color="#007bff" />
-        <Text style={styles.backButtonText}>Quay lại</Text>
-      </TouchableOpacity>
-      <Text style={styles.title}>QUẢN LÝ ĐƠN HÀNG</Text>
+          <FontAwesome5 name="arrow-left" size={20} color="#007bff" />
+          <Text style={styles.backButtonText}>Quay lại</Text>
+        </TouchableOpacity>
+        <Text style={styles.title}>QUẢN LÝ ĐƠN HÀNG</Text>
       
       <View style={styles.filterContainer}>
         <Text style={styles.filterLabel}>Lọc theo trạng thái:</Text>

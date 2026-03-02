@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, ScrollView } from 'react-native';import { SafeAreaView } from 'react-native-safe-area-context';import { useDispatch } from 'react-redux';
 import { addToCart } from '../../redux/slices/authSlice';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import SmartImage from '../../components/ImageHelper';
 
 const ProductDetailScreen = ({ route, navigation }) => {
   const { product } = route.params;
@@ -38,7 +39,7 @@ const ProductDetailScreen = ({ route, navigation }) => {
   };
   
 
-  console.log('Product image URL:', product.image_url); // Debug: xem URL ảnh
+  console.log('ProductDetailScreen - Product:', product.product_name, '- Image:', product.image_url);
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -46,12 +47,14 @@ const ProductDetailScreen = ({ route, navigation }) => {
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <FontAwesome5 name="arrow-left" size={24} color="#fff" />
       </TouchableOpacity>
-      <Image 
-        source={{ uri: product.image_url }} 
+      
+      <SmartImage
+        imageUrl={product.image_url}
         style={styles.productImage}
-        onError={(e) => {
-          console.error('Image load error:', e.nativeEvent.error);
-        }}
+        productName={product.product_name}
+        placeholderIcon="image"
+        placeholderText="Không có ảnh sản phẩm"
+        showLoading={true}
       />
       
       <View style={styles.infoContainer}>
@@ -123,7 +126,6 @@ const styles = StyleSheet.create({  safeArea: {
   productImage: {
     width: '100%',
     height: 350,
-    resizeMode: 'contain',
     backgroundColor: '#fff',
   },
   infoContainer: {

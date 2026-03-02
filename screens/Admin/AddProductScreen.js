@@ -75,6 +75,20 @@ const AddProductScreen = ({ navigation }) => {
     return str && (str.startsWith('http://') || str.startsWith('https://'));
   };
 
+  // Helper function để lấy MIME type từ file extension
+  const getMimeType = (filename) => {
+    if (!filename) return 'image/jpeg'; // Default
+    const ext = filename.toLowerCase().split('.').pop();
+    const mimeTypes = {
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      png: 'image/png',
+      gif: 'image/gif',
+      webp: 'image/webp'
+    };
+    return mimeTypes[ext] || 'image/jpeg';
+  };
+
   const handleAddProduct = async () => {
     if (!name || !price || !stock || !selectedCategory) {
       Alert.alert('Thông báo', 'Vui lòng điền đầy đủ thông tin sản phẩm.');
@@ -93,11 +107,20 @@ const AddProductScreen = ({ navigation }) => {
       if (imageUri) {
         Alert.alert('Đang upload', 'Đang tải ảnh lên server...');
         
+        const filename = image || 'photo.jpg';
+        const mimeType = getMimeType(filename);
+        
         const formData = new FormData();
         formData.append('image', {
           uri: imageUri,
-          type: 'image/jpeg',
-          name: image || 'photo.jpg'
+          type: mimeType,
+          name: filename
+        });
+
+        console.log('📤 Uploading image:', {
+          filename,
+          mimeType,
+          uri: imageUri
         });
 
         const uploadResponse = await axios.post(`${API_BASE_URL}/upload-image`, formData, {
@@ -108,7 +131,7 @@ const AddProductScreen = ({ navigation }) => {
 
         if (uploadResponse.data.success) {
           finalImageFilename = uploadResponse.data.filename;
-          console.log('Image uploaded successfully:', finalImageFilename);
+          console.log('✅ Image uploaded successfully:', finalImageFilename);
         } else {
           throw new Error('Upload failed');
         }
